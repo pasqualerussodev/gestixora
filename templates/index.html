@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestixora 1.0 - piattaforma di ticketing</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Gestixora</h1>
+
+        {% if session.username %}
+            <div class="mb-3">
+                <p>Benvenuto, <strong>{{ session.username }}</strong>!
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm ml-2">Logout</a>
+                </p>
+                <a href="{{ url_for('tickets.nuovo_ticket') }}" class="btn btn-primary">Crea un Nuovo Ticket</a>
+            </div>
+        {% else %}
+            <div class="mb-3">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Registrati</a>
+            </div>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert alert-info">
+                    {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <ul class="list-group">
+            {% for ticket in tickets %}
+                <li class="list-group-item">
+                    <h5>{{ ticket['title'] }} <span class="badge badge-info">{{ ticket['status'] }}</span></h5>
+                    <p>{{ ticket['description'] }}</p>
+                    <p><strong>Reparto:</strong> {{ ticket['department'] }}</p>
+                    <p><small>Creato il {{ ticket['created_at'] }} da {{ ticket['username'] }}</small></p>
+                    {% if ticket['attachment'] %}
+                        <p><a href="{{ url_for('uploaded_file', filename=ticket['attachment']) }}" target="_blank">Visualizza Allegato</a></p>
+                    {% endif %}
+                    {% if session.get('user_id') and session.user_id == ticket['user_id'] %}
+                        <a href="{{ url_for('tickets.modifica_ticket', ticket_id=ticket['id']) }}" class="btn btn-sm btn-warning">Modifica</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
